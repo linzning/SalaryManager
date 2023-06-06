@@ -79,7 +79,7 @@ class LoginFrame extends JFrame implements ActionListener{
         }else if(b_ok==e.getSource()){
             boolean find=false;
             try{
-                Conn c = new Conn(); // 创建本类对象
+                Conn c = new Conn(); // 创建conn类对象
                 Connection connection=c.getConnection(); // 调用连接数据库的方法
                 Statement statement=c.con.createStatement();
                 statement.execute("use salaryManager");
@@ -338,7 +338,6 @@ class MainFrame extends JFrame implements ActionListener{
         else if(temp==b_bydate)     //根据起始时间来查询
         {
             //添加代码
-            this.clear();
             try{
                 Conn c1 = new Conn(); // 创建本类对象
                 Connection connection=c1.getConnection(); // 调用连接数据库的方法
@@ -354,6 +353,7 @@ class MainFrame extends JFrame implements ActionListener{
                     System.out.println("日期格式错误");
                 }
                 else{
+                    this.clear();
                     ResultSet resultSet=statement.executeQuery(
                             "select * from salary where paydate>="+in_fromdate+" and paydate<="+in_todate);
                     int i=0;
@@ -620,10 +620,11 @@ class SalaryEditFrame extends JFrame implements ActionListener{
             }else if(b_update==e.getSource())		//修改某条工资记录
             {
                 //添加代码
+                clear();
                 String in_empID=t_empID.getText();
                 String in_jintie=t_jintie.getText();
                 String in_gongzi=t_gongzi.getText();
-                if(!in_jintie.equals("")){
+                if(!in_jintie.equals("")&&in_gongzi.equals("")){
                     double dou_jintie=Double.parseDouble(in_jintie);
                     String in_date=t_date.getText();
                     if(dou_jintie>=0){
@@ -683,6 +684,21 @@ class SalaryEditFrame extends JFrame implements ActionListener{
                                 null,"是否确认删除","删除前确认",JOptionPane.OK_CANCEL_OPTION)
                                 ==JOptionPane.YES_OPTION){
                             statement.executeUpdate("delete from salary where sid="+in_empID+" and paydate="+in_date);
+                            resultSet=statement.executeQuery("select * from salary");
+                            System.out.println("读取成功");
+                            i=0;
+                            while(resultSet.next()){
+                                dtm.setValueAt(resultSet.getString("paydate"),i,0);
+                                dtm.setValueAt(resultSet.getString("sid"),i,1);
+                                dtm.setValueAt(resultSet.getString("sname"),i,2);
+                                double a=resultSet.getDouble("gongzi");
+                                double b=resultSet.getDouble("jintie");
+                                dtm.setValueAt(a,i,3);
+                                dtm.setValueAt(b,i,4);
+                                dtm.setValueAt(a+b,i,5);
+                                i++;
+                            }
+                            resultSet.close();
                             System.out.println("删除成功");
                         }
                     }
@@ -697,7 +713,7 @@ class SalaryEditFrame extends JFrame implements ActionListener{
                 String in_jintie=t_jintie.getText();
                 double dou_gongzi=Double.parseDouble(in_gongzi);
                 double dou_jintie=Double.parseDouble(in_jintie);
-                if(!date_check("in_date")||dou_gongzi<0||dou_jintie<0){
+                if(!date_check(in_date)||dou_gongzi<0||dou_jintie<0){
                     JOptionPane.showMessageDialog(
                             null,"输入出现错误，请重新输入","输入错误提示",JOptionPane.WARNING_MESSAGE);
                 }
